@@ -10,9 +10,6 @@ import csv
 from selenium.common.exceptions import NoSuchElementException
 from cStringIO import StringIO
 import re
-from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
-
-from pdfminer.converter import TextConverter
 
 from pdfminer.layout import LAParams
 from PyPDF2 import PdfFileWriter, PdfFileReader
@@ -38,57 +35,40 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 import csv
 from selenium.common.exceptions import NoSuchElementException
-import MySQLdb as sql
-import smtplib
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from pprint import pprint
 from xlrd import open_workbook
-import csv
+
 from selenium.common.exceptions import NoSuchElementException
-
-from bs4 import BeautifulSoup
-import string
-import os
 import errno
-
-book = open_workbook('E:/Check.xlsx')
-
-#download the first file
-
-
-#check the posting date
-
-for i in range(1,2):
-    print i
-    sheet1= book.sheet_by_index(0)
-    address =''.join(str(sheet1.cell(i,0).value))
-    print address
-    profile = webdriver.FirefoxProfile()
-    profile.set_preference("browser.download.folderList", 2)
-    profile.set_preference("browser.download.dir", "C:\Users\Jue Wang\Downloads\workplace")
-    profile.set_preference("browser.download.manager.showWhenStarting", False)
-
-    profile.set_preference("plugin.scan.plid.all", False)
-    profile.set_preference("plugin.scan.Acrobat", "99.0")
-    profile.set_preference("browser.helperApps.alwaysAsk.force", False)
-    profile.set_preference("browser.download.manager.useWindow", False)
-    profile.set_preference("browser.download.manager.closeWhenDone", True)
-    profile.set_preference("browser.helperApps.neverAsk.openFile", "application/pdf")
-    profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/pdf")
-    profile.set_preference("pdfjs.disabled", True)
-    browser = webdriver.Firefox(profile )
-    browser.get('http://www.regulations.gov/#!documentDetail;D=FAA-'+ address+'-0001')
-    time.sleep(5)
-    Button = browser.find_element_by_xpath('//div[@class="GIY1LSJE1D"]/div[@class="GIY1LSJA1D floatLeft"]//a[2]').click()
+import shutil
+import os, sys
+import win32com.client
+shell = win32com.client.Dispatch("WScript.Shell")
 
 
-    Button2 = browser.find_element_by_xpath('//div[@class="GIY1LSJGJD GIY1LSJOTC"]/div[@class="GIY1LSJJJD"]/a').click()
-    name = browser.find_element_by_xpath('//div[@class="GIY1LSJBQD"]//li[6]')
-    name = name.text.encode('utf-8')
-    print name
-    #browser.close()
+address="2015-6314"
+#preferences set the dir and make sure the application/octet-stream will be asked anyway, so no need to set that
+profile = webdriver.FirefoxProfile()
+profile.set_preference("browser.download.folderList", 2)
+profile.set_preference("browser.download.dir", "Folder")
+profile.set_preference("browser.helperApps.alwaysAsk.force", False)
 
-#browser.get('https://www.regulations.gov/searchResults?rpp=25&po=35925&s=%22section%2B333%22%2BFAA&fp=true&dct=FR%2BPR%2BN%2BO')
-
+browser = webdriver.Firefox(profile)
+browser.get('http://www.regulations.gov/#!documentDetail;D=FAA-' + address + '-0001')
+time.sleep(3)
+Button = browser.find_element_by_xpath('//div[@class="GIY1LSJE1D"]/div[@class="GIY1LSJA1D floatLeft"]//a').click()
+time.sleep(3)
+#use default enter to solve the downloading problem
+shell.SendKeys("{ENTER}", 0)
+time.sleep(2)
+rootpath = 'C:\Users\wang547\Downloads\Containdownload'
+#find the recent downloaded file
+filelist = [os.path.join(rootpath, f) for f in os.listdir(rootpath)]
+filelist = [f for f in filelist if os.path.isfile(f)]
+newest = max(filelist, key=lambda x: os.stat(x).st_mtime)
+print newest
+#rename the file with the right address, if download is not succesful, it could overwrite prior files
+os.rename(newest,'C:/Users/wang547/Downloads/Containdownload/'+address + '-0001.pdf')
