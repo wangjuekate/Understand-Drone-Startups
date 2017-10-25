@@ -34,43 +34,86 @@ import cookielib
 import urllib
 import PyPDF2
 import dateutil.parser
+import urlparse
+import urllib2
+import os
+import sys
+from bs4 import BeautifulSoup
+firefoxProfile = FirefoxProfile()
+## Disable CSS
+firefoxProfile.set_preference('permissions.default.stylesheet', 2)
+## Disable images
+firefoxProfile.set_preference('permissions.default.image', 2)
+## Disable Flash
+firefoxProfile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so', 'false')
+firefoxProfile.set_preference('permissions.default.stylesheet', 2)
+firefoxProfile.set_preference('permissions.default.image', 2)
+firefoxProfile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so','false')
+firefoxProfile.set_preference("http.response.timeout", 10)
+firefoxProfile.set_preference("dom.max_script_run_time", 10)
+
+#https://null-byte.wonderhowto.com/how-to/download-all-pdfs-webpage-with-python-script-0163031/
 
 
+def convert(fname, pages=None):
+    if not pages:
+        pagenums = set()
 
+    else:
+        pagenums = set(pages)
+
+    output = StringIO()
+    manager = PDFResourceManager()
+    converter = TextConverter(manager, output, laparams=LAParams())
+    interpreter = PDFPageInterpreter(manager, converter)
+    infile = file(fname, 'rb')
+
+    for page in PDFPage.get_pages(infile, pagenums):
+        interpreter.process_page(page)
+    infile.close()
+    converter.close()
+    text = output.getvalue()
+    output.close
+    return text
+
+
+def download_file(download_url):
+    web_file = urllib.urlopen(download_url)
+    local_file = open('C:/Users/Jue Wang/Downloads/output.pdf', 'wb')
+    local_file.write(web_file.read())
+    web_file.close()
+    local_file.close()
+
+#import the url
 book = open_workbook('C:\Users\Jue Wang\Downloads\Findtext.xlsx')
 
 
-csvfile = open( 'C:\Users\Jue Wang\Downloads\work.csv', 'w+')
-fieldnames = ['ID','date','zipcode']
-writer1= csv.DictWriter(csvfile, fieldnames=fieldnames)
-writer1.writeheader()
-
-
-
-for i in range(1,300):
+# last left 2484
+for i in range(2428,34432):
+    print i
     sheet1= book.sheet_by_index(0)
-    ID = sheet1.cell(i,0).value
     result =sheet1.cell(i,1).value
-    results = str(result)
-    #results = results.strip('\xe2')
-    results =re.sub(r'[/x]','',results,re.U)
-    #results = re.sub(r'[\x]',' ',results)
+    name = sheet1.cell(i,0).value
+    name =str(name)
+    website= 'https://www.regulations.gov'+''.join(result)
+    browser = webdriver.Firefox()
+    browser.get(website)
+    time.sleep(3)
+    soup = BeautifulSoup(browser.page_source)
+    tags = soup.find_all('a',href=True )
+    for tag in tags:
+        if 'pdf' in tag['href']:
+            link = tag['href']
+            web_file = urllib.urlopen(link)
+            address = 'E:/'+name+'.pdf'
+            local_file = open(address, 'wb')
+            local_file.write(web_file.read())
+            web_file.close()
+            local_file.close()
+    browser.close()
 
 
-    try:
-        loc = results.find("By ")
-        datetofind = results[loc:loc+55]
-        print datetofind
-        loc2 = results.find("Dear")
-        address = str(results[loc2-20:loc2])
 
-        reg =re.compile ('\d{5}')
-        zipcode = reg.findall(address)
-        zipcode = "".join(zipcode)
-        zipcode = str(zipcode)
-        date = dateutil.parser.parse(datetofind , fuzzy=True).date()
-        date = str(date)
-    except Exception, e:
-        date =""
-        zipcode =""
-    writer1.writerow({'ID':ID, 'date':date, 'zipcode':zipcode})
+
+
+
