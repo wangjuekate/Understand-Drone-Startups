@@ -111,9 +111,28 @@ for i in range(2428,34432):
             web_file.close()
             local_file.close()
     browser.close()
+import dateutil.parser
+import re
+import os
 
 
 
+direc = 'E:/' # Get current working directory
+ext = '.pdf' # Select your file delimiter
+
+file_dict = {} # Create an empty dict
+
+# Select only files with the ext extension
+txt_files = [i for i in os.listdir(direc) if os.path.splitext(i)[1] == ext]
+print len(txt_files)
+# Iterate over your txt files
+for f in txt_files:
+    # Open them and assign them to file_dict
+    print os.path.join(direc,f)
+    mm = convert(os.path.join(direc,f))
+    text = "\n".join([ll.rstrip() for ll in mm.splitlines() if ll.strip()])
+    l = open('C:/Users/Jue Wang/Downloads/'+ f +'.txt', 'w')
+    l.write(text)
 
 
 
