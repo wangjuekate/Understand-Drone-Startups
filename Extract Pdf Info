@@ -135,4 +135,14 @@ for f in txt_files:
     l.write(text)
 
 
+from xlrd import open_workbook
+import csv
+
+csvfile = open('C:/Users/Jue Wang/Downloads/work.csv', 'w+')
+fieldnames = ['id','name', 'text', 'date', 'zipcode','address']
+writer1 = csv.DictWriter(csvfile, fieldnames=fieldnames)
+writer1.writeheader()
+
+
+
 
