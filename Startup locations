@@ -1,0 +1,55 @@
+from selenium import webdriver
+from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
+import time
+import json
+import urllib2
+import requests
+from selenium.webdriver.common.keys import Keys
+from datetime import datetime
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException
+import csv
+from selenium.common.exceptions import NoSuchElementException
+import MySQLdb as sql
+import smtplib
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
+from pprint import pprint
+from xlrd import open_workbook
+import csv
+from selenium.common.exceptions import NoSuchElementException
+
+from bs4 import BeautifulSoup
+import string
+
+book = open_workbook('C:/Users/Jue Wang/Downloads/leftout.xlsx')
+
+
+browser = webdriver.Firefox()
+
+for i in range(2933,8000):
+    print i
+    sheet1= book.sheet_by_index(0)
+    address =''.join(str(sheet1.cell(i,0).value))
+    print address
+    website = 'https://www.regulations.gov'+'/document?D=FAA-'+address +'-0001'
+    browser.get(website)
+    time.sleep(5)
+    soup = BeautifulSoup(browser.page_source)
+    sources = soup.find_all('div', {'class': 'GIY1LSJNTC'})
+    item = []
+    for tag in sources[0:len(sources)]:
+        tag2 = tag.find_all('div', {'class': 'basicAttr'})
+        for tag3 in tag2:
+            item1 = tag3.text.encode('utf-8')
+            item1 = ''.join(item1)
+            item.append(item1)
+    item.append(address)
+    print item
+    f = open('C:/Users/Jue Wang/Downloads/firstapply.txt', 'a')
+    json.dump(item, f)
+#browser.get('https://www.regulations.gov/searchResults?rpp=25&po=35925&s=%22section%2B333%22%2BFAA&fp=true&dct=FR%2BPR%2BN%2BO')
