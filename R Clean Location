@@ -1,0 +1,125 @@
+data<-readLines("Fullapplicationdata3.txt")
+data1<-unlist(strsplit(data,"]"))
+zipcode<-read.table(
+"D:/All_Projects/Project_Drones/Variable List/CountyPanel/zipcodefile.csv",
+sep=",",header=TRUE)
+statefips<-read.table(
+"D:/All_Projects/Project_Drones/Variable List/CountyPanel/stateabb.csv",
+sep=",",header=TRUE)
+cleanup<-function(input,statefips,zipcode){
+
+results<-unlist(strsplit(input,","))
+results<-gsub("[[:punct:]]"," ",results)
+date<-grep("Date Posted",results)
+if(length(date)!=0){
+monthday<-gsub("Date Posted","",results[date])
+monthday<-unlist(strsplit(monthday," "))
+monthday<-monthday[which(monthday!="")]
+month<-switch(monthday[1],
+"Jan"=1,
+"Feb"=2,
+"Mar"=3,
+"Apr"=4,
+"May"=5,
+"Jun"=6,
+"Jul"=7,
+"Aug"=8,
+"Sep"=9,
+"Oct"=10,
+"Nov"=11,
+"Dec"=12)
+day<-as.numeric(monthday[2])
+year<-results[date+1]
+}else{
+year<-0
+month<-0
+day<-0
+}
+
+city<-grep("City",results)
+if(length(city)!=0){
+city<-city[length(city)]
+city<-gsub("City","",results[city])
+}else{
+city<-""}
+
+state<-grep("State or Province",results)
+if(length(state)!=0){
+state<-gsub("State or Province","",results[state])
+}else{
+state=""}
+
+zip<- grep("ZIP Postal Code",results)
+if(length(zip)!=0){
+zip<-gsub("ZIP Postal Code","",results[zip])
+zip<-sub('\\D*(\\d{5}).*', '\\1', zip)
+zip<-as.numeric(zip)
+if(!is.na(zip)){
+address<-which(zipcode$zipcode==zip)
+if(length(address)!=0){
+statef<-as.character(as.matrix(zipcode[address[1],2]))
+statef<-as.numeric(as.matrix(statefips[statefips$Abb==statef,3]))
+countyfips<-zipcode[address[1],3]
+}else{
+address<-which.min(abs(zipcode$zipcode-zip))
+statef<-as.character(as.matrix(zipcode[address[1],2]))
+statef<-as.numeric(as.matrix(statefips[statefips$Abb==statef,3]))
+countyfips<-zipcode[address[1],3]}
+}else{
+zip<-""
+statef<-""
+countyfips<-""}
+}else{
+zip<-""
+statef<-""
+countyfips<-""}
+
+
+organization<- grep("Organization Name",results)
+if(length(organization)!=0){
+organization<-gsub("Organization Name","",results[organization])
+dummyorg<-1
+}else{organization=""
+dummyorg<-0
+}
+
+
+name<- grep("Submitter Name",results)
+if(length(name)!=0){
+name<-gsub("Submitter Name","",results[name])
+}else{
+name=""}
+
+representativefirm<-grep("Submitter s Representative",results)
+if(length(representativefirm)!=0){
+representativefirm<-gsub("Submitter s Representative","",results[representativefirm])
+dummyrepre<-1
+}else{
+representativefirm=""
+dummyrepre<-0
+}
+id<-results[length(results)]
+id<-unlist(strsplit(id," "))
+id<-id[which(id!="")]
+id<-paste(id,collapse="-")
+
+output<-data.frame(year)
+if(length(statef)==0){
+statef<-""}
+output<-cbind(output,month,day,city,state,zip,organization,name,
+representativefirm,statef,countyfips,dummyorg,dummyrepre,id)
+return(output)
+}
+
+input<-data1[6751]
+results<-lapply(data1[6751],cleanup,statefips,zipcode)
+results<-lapply(data1[6001:length(data1)],cleanup,statefips,zipcode)
+library(data.table)
+results<-rbindlist(results)
+nrow(results)
+write.table(results,file="test.csv",sep=",",
+row.names=FALSE,na="")
+
+
+
+
