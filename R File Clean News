@@ -1,0 +1,22 @@
+text<-readLines("C:\\Users\\wang547\\Downloads\\test.txt")
+output<-unlist(strsplit(text,'"]'))
+
+cleanid<-function(input){
+add<-unlist(strsplit(as.character(input),"\""))
+add<-add[which(add!="")]
+add<-gsub("[[:punct:]]"," ",add)
+add<-add[which(add!=" ")]
+add<-add[which(add!="  ")]
+subject<-add[1]
+time<-add[2]
+location<-add[3]
+id<-add[4]
+source<-add[5]
+txt<-paste(add[6:length(add)],collapse=" ")
+output<-data.frame(subject)
+output<-cbind(output,time,location,id,source,txt)
+return(output)
+}
+library(plyr)
+results<- lapply(output,cleanid)
+results<-do.call(rbind,results)
