@@ -1,5 +1,6 @@
 #there are four steps:
 #1.Python code the links 2. R clean the links 3.Python request the content links 4. R clean up the content 5. combine pieces together
+#saved data FinalQuest.RData
 
 #Python links
 from selenium import webdriver
