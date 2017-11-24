@@ -1,4 +1,7 @@
-#python get index
+#there are four steps:
+#1.Python code the links 2. R clean the links 3.Python request the content links 4. R clean up the content 5. combine pieces together
+
+#Python links
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import NoSuchElementException
@@ -25,21 +28,21 @@ timeout = 5
 try:
 
     search =browser.find_element_by_xpath('//*[@id="searchTerm"]')
-    search.send_keys('FT(drone OR (Unmanned /N0 Aerial /N0 Vehicle) OR (Unmanned /N0 Air /N0 Vehicle) OR (Unmanned /N0 Aircraft /N0 Vehicle) OR (Unmanned /N0 Aerospace /N0 Vehicle) OR (Uninhabited /N0 Aircraft /N0 Vehicle)) AND PD(>2012-01-01 AND <2012-03-01)' )
+    search.send_keys('FT(drone OR (Unmanned /N0 Aerial /N0 Vehicle) OR (Unmanned /N0 Air /N0 Vehicle) OR (Unmanned /N0 Aircraft /N0 Vehicle) OR (Unmanned /N0 Aerospace /N0 Vehicle) OR (Uninhabited /N0 Aircraft /N0 Vehicle)) AND PD(>2015-09-01 AND <2016-01-01)' )
     htmlElem = browser.find_element_by_xpath('//*[@id="expandedSearch"]')
     htmlElem.send_keys(Keys.ENTER)
     time.sleep(120)
 except TimeoutException:
     print("Timed out waiting for page to load")
 
-for i in range(0, 1000):
+for i in range(1000, 5000,1):
     print i
     soup = BeautifulSoup(browser.page_source)
     sources = soup.find_all('a', {'id': 'citationDocTitleLink'})
     for source in sources:
         item = []
         item.append(source['href'])
-        f = open('C:/Users/wang547/Downloads/index1.txt', 'a')
+        f = open('C:/Users/wang547/Downloads/index3.txt', 'a')
         json.dump(item, f)
     next = browser.find_element_by_xpath('//*[@id="mainContentRight"]/nav/ul/li[13]/a')
     next.click()
@@ -47,10 +50,9 @@ for i in range(0, 1000):
 
 
 
+#R clean links
 
-
-#R code clearning
-data<-readLines("C:\\Users\\wang547\\Downloads\\index1.txt")
+data<-readLines("C:\\Users\\wang547\\Downloads\\index15.txt")
 output<-unlist(strsplit(data,"]"))
 cleanid<-function(input){
 add<-unlist(strsplit(input,"[[:punct:]]"))
@@ -64,9 +66,9 @@ return(output)
 library(plyr)
 results<- lapply(output,cleanid)
 results<-do.call(rbind,results)
-write.table(results,file="index1.csv",row.names=FALSE,sep=",")
+write.table(results,file="index15.csv",row.names=FALSE,sep=",")
 
-#Python code get index
+#Python content
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import NoSuchElementException
@@ -87,9 +89,9 @@ profile.set_preference("browser.download.dir", "C:\Users\wang547\Downloads\Conta
 # profile.set_preference("browser.download.manager.showWhenStarting", False)
 profile.set_preference("browser.helperApps.alwaysAsk.force", False)
 
-book = open_workbook('C:\Users\wang547\Documents\index1.xlsx')
+book = open_workbook('C:/Users/wang547/Documents/allindex.xlsx')
 
-for i in range(1, 1000):
+for i in range(13269,300000):
     print i
     id = int(book.sheet_by_index(0).cell(i, 0).value)
     print id
@@ -142,5 +144,34 @@ for i in range(1, 1000):
             if txt1 is not None:
                 txt = txt + txt1
         item[5] =txt
-    f = open('C:/Users/wang547/Downloads/test.txt', 'a')
+    f = open('C:/Users/wang547/Downloads/allindex.txt', 'a')
     json.dump(item, f)
+
+
+
+#R clean content
+text<-readLines("C:\\Users\\wang547\\Downloads\\index4\\index4content.txt")
+output<-unlist(strsplit(text,'"]'))
+
+cleanid<-function(input){
+add<-unlist(strsplit(as.character(input),"\""))
+add<-add[which(add!="")]
+add<-gsub("[[:punct:]]"," ",add)
+add<-add[which(add!=" ")]
+add<-add[which(add!="  ")]
+subject<-add[1]
+time<-add[2]
+location<-add[3]
+id<-add[4]
+source<-add[5]
+txt<-paste(add[6:length(add)],collapse=" ")
+output<-data.frame(subject)
+output<-cbind(output,time,location,id,source,txt)
+return(output)
+}
+library(plyr)
+results<- lapply(output,cleanid)
+library(data.table)
+results<-rbindlist(results)
+index3<-results
+save(index3,file="index4.RData")
