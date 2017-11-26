@@ -1,3 +1,17 @@
 #Eliminate irrelevant news
 #bees
 #military attacks
+#clean up unrelated words
+unrelatetopic<-function(input){
+compare<-tolower(input[1])
+output<-grep("bee", compare)
+if(length(output)!=0){
+return(1)
+}else{
+return(0)
+}
+}
+library(plyr)
+results<-apply(FinalQuest,1,unrelatetopic)
+FinalQuestC<-FinalQuest[which(results!=1),]
+save(FinalQuestC,file="FullDiscursiveSpaceDrone.RData")
