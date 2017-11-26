@@ -15,3 +15,151 @@ library(plyr)
 results<-apply(FinalQuest,1,unrelatetopic)
 FinalQuestC<-FinalQuest[which(results!=1),]
 save(FinalQuestC,file="FullDiscursiveSpaceDrone.RData")
+
+dictionary<-read.table("dictionary.csv",
+sep=",",header=TRUE)
+orglist<- read.table("orglist.csv",sep=",",header=TRUE)
+orglist<-as.character(as.matrix(orglist))
+
+
+locationlist<-read.table("citylocation.csv",sep=",",header=TRUE)
+cleanlocation<-function(input){
+city<-unlist(strsplit(input[2], ","))
+city<-city[1]
+city<-gsub("City","",city)
+city<-gsub("CDP","",city)
+city<-gsub("city","",city)
+output<-data.frame(city)
+output<-cbind(output,input[1])
+return(output)
+}
+library(plyr)
+location<-apply(locationlist,1,cleanlocation)
+library(data.table)
+location<-rbindlist(location)
+
+write.table(location,file="location.csv",sep=",",row.names=FALSE)
+location<-read.table("location.csv",sep=",",header=TRUE)
+
+
+Posemo<-dictionary[24,]
+Posemo<-unlist(strsplit(as.character(as.matrix(Posemo[2]))," "))
+Posemo<-unlist(strsplit(Posemo,"\n"))
+Posemo<-Posemo[which(Posemo!="")]
+Posemo<-gsub("[[:punct:]]","",Posemo)
+
+write(Posemo,file="Posemo.txt")
+write(Posemo,file="Negemo.txt")
+write(Posemo,file="Anx.txt")
+write(Posemo,file="Anger.txt")
+write(Posemo,file="Sad.txt")
+write(Posemo,file="Reward.txt")
+write(Posemo,file="Risk.txt")
+write(Posemo,file="FocusPast.txt")
+write(Posemo,file="FocusPresent.txt")
+write(Posemo,file="FocusFuture.txt")
+
+
+Posemo<-readLines("Posemo.txt")
+Negemo<-readLines("Negemo.txt")
+Anx<-readLines("Anx.txt")
+Anger<-readLines("Anger.txt")
+Sad<-readLines("Sad.txt")
+Reward<-readLines("Reward.txt")
+Risk<-readLines("Risk.txt")
+FocusPast<-readLines("FocusPast.txt")
+FocusPresent<-readLines("FocusPresent.txt")
+FocusFuture<-readLines("FocusFuture.txt")
+
+
+
+labledoc<-function(input,orglist,
+Posemo,Negemo,Anx,Anger,Sad,Reward,Risk,FocusPast,FocusPresent,FocusFuture
+){
+work<-paste(as.character(as.matrix(input[3])),
+as.character(as.matrix(input[6])),sep=" ")
+test<-unlist(strsplit(work," "))
+test<-test[which(test!="")]
+test<-tolower(test)
+total<-length(test)
+Posemo<-length(which(test%in%Posemo))/(total+1)
+Negemo<-length(which(test%in%Negemo))/(total+1)
+Anx<-length(which(test%in%Anx))/(total+1)
+Anger<-length(which(test%in%Anger))/(total+1)
+Sad<-length(which(test%in%Sad))/(total+1)
+Reward<-length(which(test%in%Reward))/(total+1)
+Risk<-length(which(test%in%Risk))/(total+1)
+FocusPast<-length(which(test%in%FocusPast))/(total+1)
+FocusPresent<-length(which(test%in%FocusPresent))/(total+1)
+FocusFuture<-length(which(test%in%FocusFuture))/(total+1)
+
+
+Orgs<-matrix("",nrow=3,ncol=1)
+loc<-which( sapply(as.character(as.matrix(orglist)), grepl, work))
+Orgs<-orglist[loc[1:3]]
+Orgs<-data.frame(t(Orgs))
+colnames(Orgs)<-c("org1","org2","org3")
+
+output<-data.frame(Posemo)
+output<-cbind(output,Negemo,Anx,Anger,Sad,Reward,Risk,FocusPast,
+FocusPresent,FocusFuture, Orgs)
+return(output)
+}
+t<-proc.time()
+results<-apply(index1[1:10,],1,labledoc,orglist,location,
+Posemo,Negemo,Anx,Anger,Sad,Reward,Risk,FocusPast,FocusPresent,FocusFuture)
+proc.time()-t
+library(data.table)
+results<-rbindlist(results)
+
+#clean up location and time for documents
+cleantimelocation<-function(input, location){
+work<-input[2]
+loca<-matrix("",nrow=3,ncol=1)
+loc<-which( sapply(as.character(as.matrix(location[,1])), grepl, work))
+loca<-location[loc[1:3],2]
+loca<-data.frame(t(loca))
+colnames(loca)<-c("loca1","loca2","loca3")
+
+
+
+
+#topic model
+library(stm)
+processed <- textProcessor(index1[1:10,]$txt)
+processed$meta<-results
+out <- prepDocuments(processed$documents, processed$vocab, processed$meta,
+lower.thresh = 1) # change threshold to control the dictionary
+
+
+poliblogPrevFit <- stm(documents = out$documents, vocab = out$vocab,
+K = 3,prevalence = ~Posemo+ Negemo +Anx+Anger+Sad+Reward+Risk,
+max.em.its = 75, data = out$meta,
+init.type = "Spectral")
+
+exp(poliblogPrevFit$mu$gamma[,2])
+
+names(poliblogPrevFit)
+poliblogPrevFit$mu
+poliblogPrevFit$beta
+
+
+# construct distribution dictionary for frames
+
+frame1<-out$vocab
+frame1<-data.frame(frame1)
+dist<-(data.frame(poliblogPrevFit$beta)[1,]+
+data.frame(poliblogPrevFit$beta)[2,])/2
+frame1<-cbind(frame1,t(dist))
+write.table(frame1,file="frame1.csv",sep=",",row.names=FALSE)
+
+# lable each documents with the frame percentages
+labelframe<-function(input, frame1){
+work<-input
+
+loca<-matrix("",nrow=3,ncol=1)
+loc<-which( sapply(as.character(as.matrix(frame1[,1])), grepl, work))
+loca<-location[loc[1:3],2]
+loca<-data.frame(t(loca))
+colnames(loca)<-c("loca1","loca2","loca3")
+
