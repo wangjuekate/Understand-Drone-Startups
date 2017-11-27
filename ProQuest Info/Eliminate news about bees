@@ -111,6 +111,9 @@ Posemo,Negemo,Anx,Anger,Sad,Reward,Risk,FocusPast,FocusPresent,FocusFuture)
 proc.time()-t
 library(data.table)
 results<-rbindlist(results)
+fileemotion<-results
+save(fileemotion,file="Fileemotion.RData")
+
 
 #clean up location and time for documents
 cleantimelocation<-function(input, location){
@@ -126,8 +129,7 @@ colnames(loca)<-c("loca1","loca2","loca3")
 
 #topic model
 library(stm)
-processed <- textProcessor(index1[1:10,]$txt)
-processed$meta<-results
+processed <- textProcessor(index1[1:10,]$txt, meta = results[1:10,])
 out <- prepDocuments(processed$documents, processed$vocab, processed$meta,
 lower.thresh = 1) # change threshold to control the dictionary
 
