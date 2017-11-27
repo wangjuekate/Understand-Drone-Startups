@@ -125,6 +125,66 @@ loca<-data.frame(t(loca))
 colnames(loca)<-c("loca1","loca2","loca3")
 
 
+#Detect Topics and the related organizations
+
+
+#percentage topics by subject
+fileemotion$id<-FinalQuestC$id
+
+subject1<-FinalQuestC[which(fileemotion$org1=="AMA"|
+fileemotion$org2=="AMA"|
+fileemotion$org3=="AMA"
+),1]
+
+subject2<-FinalQuestC[which(fileemotion$org1=="AUVSI"|
+fileemotion$org2=="AUVSI"|
+fileemotion$org3=="AUVSI"
+),1]
+
+subject3<-FinalQuestC[which(fileemotion$org1=="SUC"|
+fileemotion$org2=="SUC"|
+fileemotion$org3=="SUC"|fileemotion$org1=="Small UAV Coalition"|
+fileemotion$org2=="Small UAV Coalition"|
+fileemotion$org3=="Small UAV Coalition"
+),1]
+
+subject4<-FinalQuestC[which(fileemotion$org1=="American Civil Liberties Union"|
+fileemotion$org2=="American Civil Liberties Union"|
+fileemotion$org3=="American Civil Liberties Union"|fileemotion$org1=="ACLU"|
+fileemotion$org2=="ACLU"|
+fileemotion$org3=="ACLU"
+),1]
+
+
+subject5<-FinalQuestC[which(fileemotion$org1=="EFF"|
+fileemotion$org2=="EFF"|
+fileemotion$org3=="EFF"
+),1]
+
+subject6<-FinalQuestC[which(fileemotion$org1=="Electronic Privacy Information Center"|
+fileemotion$org2=="Electronic Privacy Information Center"|
+fileemotion$org3=="Electronic Privacy Information Center"|fileemotion$org1=="EPIC"|
+fileemotion$org2=="EPIC"|
+fileemotion$org3=="EPIC"
+),1]
+
+
+subject7<-FinalQuestC[which(fileemotion$org1=="Future of Privacy Forum"|
+fileemotion$org2=="Future of Privacy Forum"|
+fileemotion$org3=="Future of Privacy Forum"
+),1]
+
+output<-c(as.character(as.matrix(fileemotion$org1)),as.character(as.matrix(fileemotion$org2)),as.character(as.matrix(fileemotion$org3)))
+output<-output[which(!is.na(output))]
+k1<-table(output)/sum(table(output))
+
+
+subject<-unlist(strsplit(tolower(as.character(as.matrix(subject7))),"  "))
+subject<-subject[which(subject!="")]
+k<-table(subject)
+k1<-k[which(k>0)]/sum(k[which(k>0)])
+k1
+write.table(cbind(k1,names(k1)),file="test.csv",sep=",",row.names=FALSE)
 
 
 #topic model
@@ -136,6 +196,21 @@ lower.thresh = 1) # change threshold to control the dictionary
 
 poliblogPrevFit <- stm(documents = out$documents, vocab = out$vocab,
 K = 3,prevalence = ~Posemo+ Negemo +Anx+Anger+Sad+Reward+Risk,
+max.em.its = 75, data = out$meta,
+init.type = "Spectral")
+
+
+library(tm)
+library(SnowballC)
+library(stm)
+processed <- textProcessor(FinalQuestC$txt[1:10], meta = fileemotion[1:10,])
+out <- prepDocuments(processed$documents, processed$vocab, processed$meta,
+lower.thresh = 5) # change threshold to control the dictionary
+
+
+
+poliblogPrevFit <- stm(documents = out$documents, vocab = out$vocab,
+K = 5,prevalence = ~Reward+Risk,
 max.em.its = 75, data = out$meta,
 init.type = "Spectral")
 
