@@ -1,0 +1,52 @@
+#Combine the data
+final<-timeid
+final<-cbind(final,fileemotion)
+final$txt<-FinalQuestC$txt
+#clean the data
+final<-final[which(!is.na(final$month)),]
+
+library(tm)
+library(SnowballC)
+library(stm)
+#topic estimate over time
+estimatetopic<-function(input,names){
+meta<-data.frame(input[,5:11])
+colnames<-names[5:11]
+processed <- textProcessor(input[,19], meta =meta)
+out <- prepDocuments(processed$documents, processed$vocab, processed$meta,
+lower.thresh = 1) # change threshold to control the dictionary
+
+poliblogPrevFit <- stm(documents = out$documents, vocab = out$vocab,
+K = 6,prevalence = ~Reward+Risk+Posemo +Negemo+ Anx+  Anger+ Sad+Risk*Posemo+Risk*Negemo,
+max.em.its = 75, data = out$meta,
+init.type = "LDA")
+
+output<-data.frame(matrix("",nrow=1,ncol=12))
+colnames(output)<-c("Topic1top","prob","topicid",names[5:11],"riskpose","riskneg")
+
+for (i in 1:5){
+k<-poliblogPrevFit$beta$logbeta[[1]][i,]
+k1<-k[order(-k)][1:10]
+prob<-exp(k1)/(1+exp(k1))
+Topic1top<-poliblogPrevFit$vocab[which(k%in%k1)]
+output1<-data.frame(Topic1top)
+output1<-cbind(output1,prob)
+topicid<-paste(input[1,1],input[1,2],i,sep="")
+output1<-cbind(output1,topicid)
+
+#each topic has a combination of emotion combination
+k<-poliblogPrevFit$mu$gamma[,i]
+prom<-exp(k)/(1+exp(k))
+prom<-data.frame(t(prom[2:10]))
+colnames(prom)<-c(names[5:11],"riskpose","riskneg")
+output1<-cbind(output1,prom)
+output1<-data.frame(as.matrix(output1))
+output<-rbind(output,output1)
+}
+
+return(output)
+}
+names<-colnames(final)
+results<-ddply(final[1:1000,],.(year,month),estimatetopic,names)
+#output: TopicID, key10words, key10words probability, reward, risk, Posemo Negemo Anx  Anger Sad 
+#
