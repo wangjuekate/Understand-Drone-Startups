@@ -1,1 +1,4 @@
 #clean time and location for the documents R
+cleantime<-function(input){
+time<-unlist(strsplit(input[2]," "))
+time<-time[which(time!="")]
