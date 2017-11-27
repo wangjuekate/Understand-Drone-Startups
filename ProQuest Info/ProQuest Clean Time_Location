@@ -1,4 +1,37 @@
 #clean time and location for the documents R
-cleantime<-function(input){
+cleantime<-function(input, location){
 time<-unlist(strsplit(input[2]," "))
 time<-time[which(time!="")]
+if(length(time)==3&!is.na(as.numeric(time[3]))){
+year<-time[3]
+day<-time[2]
+month<-switch(time[1],
+"Jan"=1,
+"Feb"=2,
+"Mar"=3,
+"Apr"=4,
+"May"=5,
+"Jun"=6,
+"Jul"=7,
+"Aug"=8,
+"Sep"=9,
+"Oct"=10,
+"Nov"=11,
+"Dec"=12)
+if(length(month)==0){
+month<-NA}
+}else{
+year<-NA
+day<-NA
+month<-NA
+}
+output<-data.frame(year)
+id<-input[4]
+output<-cbind(output,month,day,id)
+return(output)
+}
+
+library(plyr)
+timeid<-apply(FinalQuestC,1,cleantime)
+library(data.table)
+timeid<-rbindlist(timeid)
