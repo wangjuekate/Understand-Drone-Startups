@@ -7,12 +7,13 @@ library(stm)
 estimatetopic<-function(input,names){
 
 for ( i in 1:12){
-i<-12
-input<-final[which(final$year==2014 & final$month==i),]
+names<-colnames(final)
+i<-1
+input<-final[which(final$year==2012 & final$month==i),]
 
-
+input<-as.matrix(input)
 meta<-data.frame(input[,5:11])
-colnames<-names[5:11]
+colnames(meta)<-names[5:11]
 processed <- textProcessor(input[,19], meta =meta)
 out <- prepDocuments(processed$documents, processed$vocab, processed$meta,
 lower.thresh = 1) # change threshold to control the dictionary
@@ -44,6 +45,8 @@ output1<-cbind(output1,prom)
 output1<-data.frame(as.matrix(output1))
 output<-rbind(output,output1)
 }
+TopicFinalbytime<-output
+document<-poliblogPrevFit$mu$
 
 TopicFinalbytime1<-rbind(output,TopicFinalbytime)
 
