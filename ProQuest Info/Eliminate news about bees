@@ -106,7 +106,7 @@ FocusPresent,FocusFuture, Orgs)
 return(output)
 }
 t<-proc.time()
-results<-apply(index1[1:10,],1,labledoc,orglist,location,
+results<-apply(index1[1:10,],1,labledoc,orglist,
 Posemo,Negemo,Anx,Anger,Sad,Reward,Risk,FocusPast,FocusPresent,FocusFuture)
 proc.time()-t
 library(data.table)
