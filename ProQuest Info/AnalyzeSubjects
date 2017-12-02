@@ -1,5 +1,37 @@
 #clearn up the subject
 
+#match subject
+subject1<-readLines("topic1.txt")
+subject2<-readLines("topic2.txt")
+subject3<-readLines("topic3.txt")
+subject4<-readLines("topic4.txt")
+subject5<-readLines("topic5.txt")
+
+findsubject<-function(input,subject1,subject2,subject3,subject4,subject5){
+work<-tolower(as.character(as.matrix(input[1])))
+
+loc<-which(sapply(subject1, grepl,as.character(as.matrix(work))))
+sub1<-length(loc)
+loc<-which( sapply(subject2, grepl, as.character(as.matrix(work))))
+sub2<-length(loc)
+loc<-which( sapply(subject3, grepl,as.character(as.matrix(work))))
+sub3<-length(loc)
+loc<-which( sapply(subject4, grepl,as.character(as.matrix(work))))
+sub4<-length(loc)
+loc<-which( sapply(subject5,grepl,as.character(as.matrix(work))))
+sub5<-length(loc)
+output<-data.frame(sub1)
+output<-cbind(output,sub2,sub3,sub4,sub5)
+output<-output/sum(output)
+
+}
+
+results<-apply(FinalQuestC,1,findsubject,
+subject1,subject2,subject3,subject4,subject5)
+library(data.table)
+results1<-rbindlist(results)
+FinalQuestC<-cbind(FinalQuestC,results1)
+FinalQuestCom<-FinalQuestC[which(FinalQuestC$sub1<0.5&FinalQuestC$sub2<0.5),]
 
 
 #match with the organizations
