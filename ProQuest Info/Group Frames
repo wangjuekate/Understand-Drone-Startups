@@ -1,0 +1,79 @@
+#Clean Data
+library(tm)
+library(SnowballC)
+library(stm)
+#topic estimate over time
+
+final<-timeid
+final<-cbind(final,data.frame(fileemotion)[,1:21])
+final<-data.frame(final)
+
+FinalQuestCom<-FinalQuestC[which(FinalQuestC$sub1<0.5&FinalQuestC$sub2<0.5),]
+Finalquest<-data.frame(FinalQuestCom)[,4:11]
+Finalquest$FileID<-FinalQuestCom$FileID
+
+Finalquest1<-merge(Finalquest,final,by.x="FileID",
+by.y="FileID",all.x=TRUE)
+Finalquest1<-Finalquest1[which(!is.na(Finalquest1$year)&!is.na(Finalquest1$month)),]
+Finalquest1$year<-as.numeric(as.matrix(Finalquest1$year))
+save(Finalquest1,file="Finalquest1201.RData")
+
+names<-colnames(Finalquest1)
+final<-Finalquest1
+
+
+# Analyze Frame
+
+input<-final
+meta<-input[,5:ncol(final)]
+colnames(meta)<-names[5:ncol(final)]
+meta$id<-input[,1]
+
+processed <- textProcessor(input[,4], meta =meta)
+out <- prepDocuments(processed$documents, processed$vocab, processed$meta,
+lower.thresh = 50) # change threshold to control the dictionary
+
+
+poliblogPrevFit <- stm(documents = out$documents, vocab = out$vocab,
+K = 60,prevalence = ~
+AMA+SUC+EPIC+
+EFF+AUVSI+ACLU+
+sub3+sub4+sub5+
+Reward+Risk,
+max.em.its = 75, data = out$meta,
+init.type = "LDA")
+
+#Get the parameter character
+k<-poliblogPrevFit$mu$gamma
+prom<-exp(k)/(1+exp(k))
+prom<-data.frame(prom)
+prom$add<-1-prom[,1]-prom[,2]
+prom[which(prom$add<0),]$add<-0
+
+prom<-data.frame(t(prom))
+
+
+gainframe<-colMeans(prom[which(prom[,11]>prom[,12]),],na.rm=TRUE)
+lossframe<-colMeans(prom[which(prom[,11]<prom[,12]),],na.rm=TRUE)
+k1<-gainframe[3:7]/sum(gainframe[3:7])
+k2<-lossframe[3:7]/sum(lossframe[3:7])
+k1<-cbind(k1,k2)
+
+k1<-gainframe[8:10]/sum(gainframe[8:10])
+k2<-lossframe[8:10]/sum(lossframe[8:10])
+k1<-cbind(k1,k2)
+
+gainframe[11:12]/sum(gainframe[11:12])
+lossframe[11:12]/sum(lossframe[11:12])
+
+
+#get the word distribution
+
+
+
+# Word Cloud Construction
+
+
+
+#get the document frames and time distribution
+
