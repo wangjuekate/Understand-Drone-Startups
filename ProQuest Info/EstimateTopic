@@ -113,3 +113,58 @@ output$cumu<-as.numeric(as.matrix(unlist(strsplit(output1[,2],","))))
 
  write.table(output,file="test.csv",sep=",",row.names=FALSE)
 
+# Analyze Full Data together
+
+input<-final
+meta<-input[,5:ncol(final)]
+colnames(meta)<-names[5:ncol(final)]
+meta$id<-input[,1]
+
+processed <- textProcessor(input[,4], meta =meta)
+out <- prepDocuments(processed$documents, processed$vocab, processed$meta,
+lower.thresh = 50) # change threshold to control the dictionary
+
+
+poliblogPrevFit <- stm(documents = out$documents, vocab = out$vocab,
+K = 60,prevalence = ~
+AMA+SUC+EPIC+
+EFF+AUVSI+ACLU+
+sub3+sub4+sub5+
+Reward+Risk,
+max.em.its = 75, data = out$meta,
+init.type = "LDA")
+
+
+k<-poliblogPrevFit$mu$gamma
+prom<-exp(k)/(1+exp(k))
+prom<-data.frame(prom)
+prom$add<-1-prom[,1]-prom[,2]
+prom[which(prom$add<0),]$add<-0
+
+TopicFinalbytime<-read.table("test2014.csv",sep=",",header=TRUE)
+library(stringr)
+year<-unlist(str_extract_all(TopicFinalbytime$topicid,"[[:digit:]]{4}"))
+TopicFinalbytime$year<-as.numeric(year)
+topic<-stri_sub(TopicFinalbytime$topicid,-1,-1)
+TopicFinalbytime$topic<-as.numeric(topic)
+month<-(TopicFinalbytime$topicid-
+TopicFinalbytime$topic)/10
+month<-gsub("2015","",month)
+TopicFinalbytime$month<-month
+
+k<-data.frame(t(prom))
+
+#Distribution of 60 topics
+gainframe<-colMeans(k[which(k[,11]>k[,12]),],na.rm=TRUE)
+lossframe<-colMeans(k[which(k[,11]<k[,12]),],na.rm=TRUE)
+k1<-gainframe[3:7]/sum(gainframe[3:7])
+k2<-lossframe[3:7]/sum(lossframe[3:7])
+k1<-cbind(k1,k2)
+
+k1<-gainframe[8:10]/sum(gainframe[8:10])
+k2<-lossframe[8:10]/sum(lossframe[8:10])
+k1<-cbind(k1,k2)
+
+gainframe[11:12]/sum(gainframe[11:12])
+lossframe[11:12]/sum(lossframe[11:12])
+
