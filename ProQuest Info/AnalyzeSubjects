@@ -35,3 +35,55 @@ FinalQuestCom<-FinalQuestC[which(FinalQuestC$sub1<0.5&FinalQuestC$sub2<0.5),]
 
 
 #match with the organizations
+fileemotion$AMA<-0
+fileemotion$SUC<-0
+fileemotion$FPF<-0
+fileemotion$EPIC<-0
+fileemotion$EFF<-0
+fileemotion$AUVSI<-0
+fileemotion$ACLU<-0
+
+
+fileemotion[which(fileemotion$org1=="AMA"|
+fileemotion$org2=="AMA"|
+fileemotion$org3=="AMA"
+),]$AMA<-1
+
+fileemotion[which(fileemotion$org1=="AUVSI"|
+fileemotion$org2=="AUVSI"|
+fileemotion$org3=="AUVSI"
+),]$AUVSI<-1
+
+fileemotion[which(fileemotion$org1=="SUC"|
+fileemotion$org2=="SUC"|
+fileemotion$org3=="SUC"|fileemotion$org1=="Small UAV Coalition"|
+fileemotion$org2=="Small UAV Coalition"|
+fileemotion$org3=="Small UAV Coalition"
+),]$SUC<-1
+
+fileemotion[which(fileemotion$org1=="American Civil Liberties Union"|
+fileemotion$org2=="American Civil Liberties Union"|
+fileemotion$org3=="American Civil Liberties Union"|fileemotion$org1=="ACLU"|
+fileemotion$org2=="ACLU"|
+fileemotion$org3=="ACLU"
+),]$ACLU<-1
+
+
+fileemotion[which(fileemotion$org1=="EFF"|
+fileemotion$org2=="EFF"|
+fileemotion$org3=="EFF"
+),]$EFF<-1
+
+fileemotion[which(fileemotion$org1=="Electronic Privacy Information Center"|
+fileemotion$org2=="Electronic Privacy Information Center"|
+fileemotion$org3=="Electronic Privacy Information Center"|fileemotion$org1=="EPIC"|
+fileemotion$org2=="EPIC"|
+fileemotion$org3=="EPIC"
+),]$EPIC<-1
+
+fileemotion[which(fileemotion$org1=="Future of Privacy Forum"|
+fileemotion$org2=="Future of Privacy Forum"|
+fileemotion$org3=="Future of Privacy Forum"
+),]$FPF<-1
+
+save(fileemotion,file="Fileemotion.RData")
