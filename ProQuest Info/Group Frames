@@ -68,12 +68,24 @@ lossframe[11:12]/sum(lossframe[11:12])
 
 
 #get the word distribution
+topic1add<-which(prom[,11]>prom[,12])
+topic2add<-which(prom[,11]<prom[,12])
 
 
+k<-colMeans(poliblogPrevFit$beta$logbeta[[1]][topic1add,])
+k1<-k[which(k>(-84.6))]
+prob<-exp(k1)/(1+exp(k1))
+Topic1top<-poliblogPrevFit$vocab[which(k>(-84.6))]
 
-# Word Cloud Construction
 
+library(wordcloud)
+
+wordcloud(Topic1top, prob, min.freq =0.000001, 
+scale=c(5, .2), 
+random.order = FALSE, random.color = FALSE, colors= 
+c("lightsteelblue1","lightsteelblue2","lightsteelblue3","lightsteelblue"))
 
 
 #get the document frames and time distribution
+document<-
 
