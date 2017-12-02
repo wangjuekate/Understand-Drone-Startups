@@ -87,5 +87,30 @@ c("lightsteelblue1","lightsteelblue2","lightsteelblue3","lightsteelblue"))
 
 
 #get the document frames and time distribution
-document<-
+
+docframepercent<-rowMeans(data.frame(poliblogPrevFit$theta)[,topic1add],na.rm=TRUE)
+docframepercent2<-rowMeans(data.frame(poliblogPrevFit$theta)[,topic2add],na.rm=TRUE)
+doc<-cbind(docframepercent,docframepercent2)
+document1<-cbind(doc,out$meta$id)
+summary(document1)
+time<-final[,9:12]
+time$FileID<-final$FileID
+document1<- merge(document1,time,by.x="V3",by.y="FileID",all.x=TRUE)
+
+addup<-function(input){
+topic1<-sum(input[2])
+topic2<-sum(input[3])
+output<-data.frame(topic1)
+output<-cbind(output,topic2)
+return(output)
+}
+library(plyr)
+output<-ddply(document1,.(year,month),addup)
+
+output<-output[order(output$year,output$month),]
+mm<-matrix(1,nrow=nrow(output),ncol=nrow(output))
+output$cumutopic1<- lower.tri(mm)%*%as.numeric(output[,3])
+output$cumutopic2<- lower.tri(mm)%*%as.numeric(output[,4])
+
+write.table(output,file="test.csv",sep=",",row.names=FALSE)
 
