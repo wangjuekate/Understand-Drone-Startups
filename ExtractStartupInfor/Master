@@ -1,0 +1,19 @@
+
+
+
+
+#In Python
+#Read FileID
+
+
+#Extract Name from the website
+#use Google API to get the index page of the startup
+#use wayback machine to extract the website at 201606
+#write out to files, name as FileID with time 
+
+
+
+
+# In R to analyze the files
+#extract time range of the website
+#check keywords from the file
