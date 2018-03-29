@@ -1,32 +1,49 @@
 import html2text
-from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
+import selenium
 import time
-from bs4 import BeautifulSoup
 import requests
 import urllib2
-
+import time
+import json
+import urllib2
+import requests
+import csv
+import bs4
+import MySQLdb as sql
+import smtplib
+import pprint
+import xlrd
+import csv
+import string
 
 
 #In Python
 #Read FileID
-
-
-
+book = open_workbook('C:/Users/Jue Wang/Downloads/leftout.xlsx')
+for i in range(2933,8000):
+    print i
+    sheet1= book.sheet_by_index(0)
+    address =''.join(str(sheet1.cell(i,0).value))
+    print address
+    website = 'https://www.regulations.gov'+'/document?D=FAA-'+address +'-0001'
+    browser.get(website)
+    time.sleep(5)
 
 #Extract Name from the website
-firmname = 
+firmname = browser.find_element_by_xpath('//div[@class="GIY1LSJCID"]/h1').text.encode('utf-8')
+#Extract Name from the website
+firmname = firmname.split('-')[0]
 
 #use Google API to get the index page of the startup
 
 #check whether the website is valid
 firm ='https://www.sensefly.com/'
 
+#write out the information
+csvfile = open( 'C:\Users\Jue Wang\Downloads\indexpageinfor.csv', 'wb')
+fieldnames = ['DocID', 'firmname','indexpage']
+writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+writer.writeheader()
 
 #use wayback machine to extract the website at 201606
 time = '201603'
