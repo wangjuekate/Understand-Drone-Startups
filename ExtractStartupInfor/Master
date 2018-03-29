@@ -1,4 +1,15 @@
-
+import html2text
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+import time
+from bs4 import BeautifulSoup
+import requests
+import urllib2
 
 
 
@@ -6,11 +17,32 @@
 #Read FileID
 
 
-#Extract Name from the website
-#use Google API to get the index page of the startup
-#use wayback machine to extract the website at 201606
-#write out to files, name as FileID with time 
 
+
+#Extract Name from the website
+firmname = 
+
+#use Google API to get the index page of the startup
+
+#check whether the website is valid
+firm ='https://www.sensefly.com/'
+
+
+#use wayback machine to extract the website at 201606
+time = '201603'
+url = 'https://web.archive.org/web/'+ time + '/'+firm
+page =urllib2.urlopen(url)
+f=page.read().decode('utf-8')
+html = f
+h = html2text.HTML2Text()
+h.ignore_links = True
+
+
+#write out to files, name as FileID with time 
+file = 'C:/Users/wang547/'+fileID +time+'.txt'
+print file
+out = open (file,'w+')
+out.write(h.handle(html).encode('utf-8'))
 
 
 
