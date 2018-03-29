@@ -1,0 +1,41 @@
+import html2text
+
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+import time
+from bs4 import BeautifulSoup
+import requests
+import urllib2
+
+time = '201701'
+
+url = 'https://web.archive.org/web/'+ time + '/https://3dr.com/'
+'''
+profile = webdriver.FirefoxProfile()
+profile.set_preference("browser.download.folderList", 2)
+profile.set_preference("browser.download.dir", "C:\Users\wang547\Downloads\Containdownload")
+# profile.set_preference("browser.download.manager.showWhenStarting", False)
+profile.set_preference("browser.helperApps.alwaysAsk.force", False)
+browser = webdriver.Firefox(profile)
+
+browser.get(url )
+f= browser.page_source
+'''
+
+page =urllib2.urlopen(url)
+f=page.read().decode('utf-8')
+html = f
+
+h = html2text.HTML2Text()
+
+h.ignore_links = True
+#html = html.decode('utf-8')
+file = 'C:/Users/wang547/flirty'+time+'.txt'
+print file
+out = open (file,'w+')
+out.write(h.handle(html).encode('utf-8'))
