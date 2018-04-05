@@ -112,3 +112,73 @@ for i in range(9888, 10000):
     print item
     f = open('C:/Users/wang547/applicationinfor.txt','a')
     json.dump(item,f)
+
+
+#additional files to check
+1300
+1316
+2128
+2966
+5138
+5475
+5544
+5551
+5661
+5800
+6620
+7142
+7507
+7622
+7752
+8593
+
+# R code to clean
+data<-readLines("C:\\Users\\wang547\\applicationinfor.txt")
+data1<-unlist(strsplit(data,"]"))
+cleanup<-function(input){
+results<-unlist(strsplit(input,","))
+results<-gsub("[[:punct:]]"," ",results)
+ID<-unlist(strsplit(results[1]," "))
+ID<-ID[which(ID!="")]
+ID<-paste(ID,collapse="-")
+Name<-results[2]
+website<-results[3]
+output<-data.frame(ID)
+output<-cbind(output,Name,website)
+return(output)
+}
+library(plyr)
+results<-lapply(data1,cleanup)
+library(data.table)
+results<-rbindlist(results)
+write.table(final,file="firmwebsite.csv",sep=",",row.names=FALSE)
+
+#read file names 
+
+wikifiles<-list.files(path = "C:\\Users\\wang547\\", pattern = "wiki.txt")
+wikifiles<-gsub("-201603wiki.txt","",wikifiles)
+results$Public<-0
+results$ID<-as.character(as.matrix(results$ID))
+results<-data.frame(results)
+results[which(results$ID%in%wikifiles),]$Public<-1
+
+#file names
+file<-list.files(path = "C:\\Users\\wang547\\", pattern = "-201603.txt")
+clean<-function(input){
+words<-readLines(paste("C:\\Users\\wang547\\",input[1],sep=""))
+ID<-gsub("-201603.txt","",input[1])
+time<-words[15]
+words<-tolower(words)
+construction<-length(grep("construction",words))
+oilgass<-length(grep("oil",words))
+argriculture<-length(grep("agriculture",words))
+output<-data.frame(ID)
+output<-cbind(output,time,construction,oilgass,argriculture)
+return(output)
+}
+library(plyr)
+timeindustry<-lapply(file,clean)
+timeindustry<-rbindlist(timeindustry)
+timeindustry$ID<-as.character(as.matrix(timeindustry$ID))
+timeindustry<-data.frame(timeindustry)
+final<-merge(results,timeindustry,by.x="ID",by.y="ID",all.x=TRUE)
