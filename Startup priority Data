@@ -1,41 +1,114 @@
 import html2text
-
-from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
+import selenium
 import time
-from bs4 import BeautifulSoup
 import requests
 import urllib2
+import time
+import json
+import urllib2
+import requests
+import csv
+import bs4
+import smtplib
+import pprint
+import xlrd
+import csv
+import string
+from googlesearch import search
+from xlrd import open_workbook
+from selenium import webdriver
+import string
+import re
+# In Python
 
-time = '201701'
+# write out the information
+csvfile = open('C:/Users/wang547/addinformation.csv', 'wb')
+fieldnames = ['DocID', 'firmname', 'indexpage']
+writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+writer.writeheader()
 
-url = 'https://web.archive.org/web/'+ time + '/https://3dr.com/'
-'''
 profile = webdriver.FirefoxProfile()
 profile.set_preference("browser.download.folderList", 2)
-profile.set_preference("browser.download.dir", "C:\Users\wang547\Downloads\Containdownload")
 # profile.set_preference("browser.download.manager.showWhenStarting", False)
 profile.set_preference("browser.helperApps.alwaysAsk.force", False)
 browser = webdriver.Firefox(profile)
+# Read FileID
+book = open_workbook('C:\Users\wang547\Documents\DocID.xlsx')
+for i in range(9888, 10000):
+    item =[]
+    print i
+    sheet1 = book.sheet_by_index(0)
+    address = ''.join(str(sheet1.cell(i, 0).value))
+    website = 'https://www.regulations.gov' + '/document?D=FAA-' + address + '-0001'
+    browser.get(website)
+    time.sleep(5)
 
-browser.get(url )
-f= browser.page_source
-'''
+# Extract Name from the website
+    firmname = browser.find_element_by_xpath('//h1[@class="GIY1LSJBID"]').text.encode('utf-8')
+# Extract Name from the website
+    k = firmname.split('-')[0]
+    k = k.translate(None,string.punctuation)
+    k= k.replace("'","")
+    k = k.replace("-", "")
+    checkname = k.split(' ')[0].lower()
+    print checkname
 
-page =urllib2.urlopen(url)
-f=page.read().decode('utf-8')
-html = f
 
-h = html2text.HTML2Text()
+# use Google API to get the index page of the startup
 
-h.ignore_links = True
-#html = html.decode('utf-8')
-file = 'C:/Users/wang547/flirty'+time+'.txt'
-print file
-out = open (file,'w+')
-out.write(h.handle(html).encode('utf-8'))
+    for firmurl in search(k, tld='com.pk', lang='eng', stop=1, num=1):
+        firmurl= firmurl
+        firmurl = firmurl.split('/')[2]
+        print firmurl
+
+# check whether the website is valid
+    if checkname not in firmurl:
+        firmurl = ""
+    else:
+        worktime = '201603'
+        url = 'https://web.archive.org/web/' + worktime + '/https://' + firmurl
+        try:
+            page = urllib2.urlopen(url)
+            try:
+                f = page.read().decode('utf-8')
+                html = f
+                h = html2text.HTML2Text()
+                h.ignore_links = True
+                text = h.handle(html).encode('utf-8')
+            except UnicodeDecodeError:
+                text =""
+        except urllib2.HTTPError:
+            text =''
+    # write out to files, name as FileID with time
+        file = 'C:/Users/wang547/' + address +'-'+ worktime + '.txt'
+
+        out = open(file, 'w+')
+        out.write(text)
+
+        for addfirmurl in search(k+' wikipedia', tld='com.pk', lang='eng', stop=1, num=1):
+            addfirmurl = addfirmurl
+
+        # check whether the website is valid
+        if (checkname in addfirmurl.lower()) & ('wikipedia' in addfirmurl.lower()):
+            page = urllib2.urlopen(addfirmurl)
+            try:
+                f = page.read().decode('utf-8')
+                html = f
+                h = html2text.HTML2Text()
+                h.ignore_links = True
+                text = h.handle(html).encode('utf-8')
+            except UnicodeDecodeError:
+                text = ""
+
+
+                # write out to files, name as FileID with time
+            file = 'C:/Users/wang547/' + address +'-'+ worktime + 'wiki.txt'
+            print file
+            out = open(file, 'w+')
+            out.write(text)
+    item.append(address)
+    item.append(k)
+    item.append(firmurl)
+    print item
+    f = open('C:/Users/wang547/applicationinfor.txt','a')
+    json.dump(item,f)
