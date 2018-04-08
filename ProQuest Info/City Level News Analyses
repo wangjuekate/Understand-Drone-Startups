@@ -1,0 +1,42 @@
+write.table(as.matrix(nowar[,4]),file="work.txt")
+nowar<-Finalquest1[which(Finalquest1$org1=="American Civil Liberties Union"),]
+summary(Finalquest1$Sad)
+address<-which(nowar$Anger>0.0001)
+length(address)
+
+Finalquest1[1,]
+
+nowar<-Finalquest1[which(Finalquest1$year>2013),]
+
+address<-grep("Hereford",Finalquest1[,4])
+length(address)
+write.table(as.matrix(nowar[address[2],]),file="work.txt")
+
+cities<-read.table("cities.csv",sep=",",header=TRUE)
+simpleCap <- function(x) {
+  s <- strsplit(x, " ")[[1]]
+  paste(toupper(substring(s, 1,1)), substring(s, 2),
+      sep="", collapse=" ")
+}
+
+city<-sapply(tolower(as.matrix(cities)), simpleCap)
+
+getaddress<-function(input,compare){
+address<-grep(as.character(as.matrix(input[1])),compare[,4])
+if(length(address)!=0){
+output<-paste(address,sep=",")
+}else{
+output<-""
+}
+output<-cbind(data.frame(input),output)
+return(output)
+}
+library(plyr)
+n<-runif(10, 5.0, 7.5)
+a<-proc.time()
+results<-lapply(city[1000:1010],getaddress,nowar)
+proc.time()-a
+results<-do.call(rbind,results)
+results<-results[which(results[,2]!=""),]
+results1<-cbind(results,nowar[as.numeric(as.matrix(results[,2])),3:4])
+write.table(results1,file="test.csv",sep=",",row.names=FALSE)
