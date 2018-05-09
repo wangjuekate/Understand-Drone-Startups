@@ -1,0 +1,43 @@
+library(foreign)
+fulldata<-read.dta("F:\\All_Projects\\Project_Lori_SocialMovementImpact\\3_FinalDataset\\SytheticControl.dta")
+
+#antisurveillance treated
+addup<-function(input){
+return(sum(input[,80]))
+}
+library(plyr)
+results<-ddply(fulldata,.(statefips,countyfips),addup)
+results[which(results$V1!=0),]$V1<-1
+length(which(results$V1!=0))
+# 17 counties
+fulldata<-merge(fulldata,results, by.x=c("statefips","countyfips"), by.y=c("statefips","countyfips"), all.x=TRUE)
+
+unique(fulldata[which(fulldata$V1.y==1),]$Cluster_statecounty)
+control<- unique(fulldata[which(fulldata$V1.y==0),]$Cluster_statecounty)
+
+fulldata[which(fulldata$Cluster_statecounty==8),80]
+
+library(Synth)
+dataprep.out<-
+dataprep(
+foo = fulldata,
+predictors = c("TotalPop","taxgrossincome","unemploymentRate"),
+predictors.op = "mean",
+dependent = "NumberofApplication",
+unit.variable="Cluster_statecounty",
+time.variable="Cluster_yearmonth",
+treatment.identifier =8,
+controls.identifier = control,
+time.predictors.prior = c(1,3,5,7)
+,time.optimize.ssr =  c(1,3,5,7)
+)
+
+synth.out <- synth(data.prep.obj = dataprep.out)
+# Get result tables
+synth.tables <- synth.tab(
+dataprep.res = dataprep.out,
+synth.res = synth.out
+)
+# results tables:
+print(synth.tables)
+
