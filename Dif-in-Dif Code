@@ -13,53 +13,77 @@ institutionaleventaddress<-which(fulldata$institutional==1)
 **************************
 Before
 *****************************
-before_3d<-matrix(0,nrow=1,ncol=length(radicaleventaddress))
-weightcontrolbefore_3d<-matrix(0,nrow=1,ncol=length(radicaleventaddress))
+fulldata<-fulldata[order(fulldata$statefips,fulldata$countyfips,fulldata$year,fulldata$month,fulldata$day),]
+daynum<-50
+address<- radicaleventaddress
+workradical<-matrix(0,nrow=2, ncol=6)
+workmoderate<-matrix(0,nrow=2, ncol=6)
+workinstitutional<-matrix(0,nrow=2, ncol=6)
 
-calculateweight<-function(input,fulldata){
-return(mean(fulldata[(input-3):input,]$V1_y))
+mm<-calculatebeforeafter(daynum, address)
+
+
+calculateweight<-function(input,fulldata,bound){
+return(mean(fulldata[bound:input,]$V1_y))
 }
 
 
-for(i in 1: length(radicaleventaddress)){
+calculatebeforeafter<-function(daynum, address){
+storagematrix<-matrix(0,nrow=2, ncol=2)
+before_3d<-matrix(0,nrow=1,ncol=length(address))
+weightcontrolbefore_3d<-matrix(0,nrow=1,ncol=length(address))
 
-before_3d[i]<-mean(fulldata[radicaleventaddress[i]:(radicaleventaddress[i]-3),]$V1_y)
+for(i in 1: length(address)){
 
-sameday<-which(fulldata$year==fulldata[radicaleventaddress[i],3]&
-fulldata$month==fulldata[radicaleventaddress[i],4]&
-fulldata$day==fulldata[radicaleventaddress[i],5]&
-fulldata$statefips!=fulldata[radicaleventaddress[i],1]&
-fulldata$countyfips!=fulldata[radicaleventaddress[i],2]
+lowerbound<-address[i]-daynum
+
+before_3d[i]<-mean(fulldata[lowerbound:address[i],]$V1_y)
+
+sameday<-which(fulldata$year==fulldata[address[i],3]&
+fulldata$month==fulldata[address[i],4]&
+fulldata$day==fulldata[address[i],5]&
+fulldata$statefips!=fulldata[address[i],1]&
+fulldata$countyfips!=fulldata[address[i],2]
 )
-weightresults<- lapply(sameday,calculateweight,fulldata)
+weightresults<- lapply(sameday,calculateweight,fulldata,lowerbound)
 
-weightcontrolbefore_3d[i]<-t(as.numeric(as.matrix(weightresults)))%*%as.matrix(1/fulldata[sameday,]$probweigthradical)
+weightresults<-as.numeric(as.matrix(weightresults))
+weightresults[which(is.na(weightresults))]<-0
+weightcontrolbefore_3d[i]<-t(weightresults)%*%as.matrix(1/fulldata[sameday,]$probweigthradical)
 }
-mean(before_3d)
-mean(weightcontrolbefore_3d)
+storagematrix[1,1]<-mean(before_3d)
+storagematrix[2,1]<-mean(weightcontrolbefore_3d)
 
-**************************
-After
-*****************************
+####after
 
-after_3d<-matrix(0,nrow=1,ncol=length(radicaleventaddress))
-weightcontrolafter_3d<-matrix(0,nrow=1,ncol=length(radicaleventaddress))
+after_3d<-matrix(0,nrow=1,ncol=length(address))
+weightcontrolafter_3d<-matrix(0,nrow=1,ncol=length(address))
 
-calculateweight<-function(input,fulldata){
-return(mean(fulldata[(input+3):input,]$V1_y))
+
+for(i in 1: length(address)){
+upperbound<-(address[i]+daynum)
+if (upperbound>nrow(fulldata)){
+upperbound<-nrow(fulldata)
 }
 
-for(i in 1: length(radicaleventaddress)){
-before_3d[i]<-mean(fulldata[radicaleventaddress[i]:(radicaleventaddress[i]+3),]$V1_y)
-sameday<-which(fulldata$year==fulldata[radicaleventaddress[i],3]&
-fulldata$month==fulldata[radicaleventaddress[i],4]&
-fulldata$day==fulldata[radicaleventaddress[i],5]&
-fulldata$statefips!=fulldata[radicaleventaddress[i],1]&
-fulldata$countyfips!=fulldata[radicaleventaddress[i],2]
+after_3d[i]<-mean(fulldata[address[i]:upperbound,]$V1_y)
+
+sameday<-which(fulldata$year==fulldata[address[i],3]&
+fulldata$month==fulldata[address[i],4]&
+fulldata$day==fulldata[address[i],5]&
+fulldata$statefips!=fulldata[address[i],1]&
+fulldata$countyfips!=fulldata[address[i],2]
 )
-weightresults<- lapply(sameday,calculateweight,fulldata)
 
-weightcontrolbefore_3d[i]<-t(as.numeric(as.matrix(weightresults)))%*%(1/fulldata[sameday,]$probweigthradical)
+weightresults<- lapply(sameday,calculateweight,fulldata,upperbound)
+weightresults<-as.numeric(as.matrix(weightresults))
+weightresults[which(is.na(weightresults))]<-0
+
+weightcontrolafter_3d[i]<-t(weightresults)%*%(1/fulldata[sameday,]$probweigthradical)
 }
-mean(after_3d)
-mean(weightcontrolafter_3d)
+storagematrix[1,2]<-mean(after_3d)
+storagematrix[2,2]<-mean(weightcontrolafter_3d)
+return(storagematrix)
+}
+
+
