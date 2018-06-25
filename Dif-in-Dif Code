@@ -23,8 +23,20 @@ workinstitutional<-matrix(0,nrow=2, ncol=6)
 mm<-calculatebeforeafter(daynum, address)
 
 
-calculateweight<-function(input,fulldata,bound){
-return(mean(fulldata[bound:input,]$V1_y))
+calculateweight<-function(input,fulldata,daynum,indi){
+boundup<-input+daynum
+bounddown<-input-daynum
+if(bounddown<0){
+bounddown<-0
+}
+if(boundup>2369058){
+boundup<-2369058
+}
+if(indi==1){
+return(mean(fulldata[bounddown:input,]$V1_y))
+}else{
+return(mean(fulldata[boundup:input,]$V1_y))
+}
 }
 
 
@@ -45,7 +57,7 @@ fulldata$day==fulldata[address[i],5]&
 fulldata$statefips!=fulldata[address[i],1]&
 fulldata$countyfips!=fulldata[address[i],2]
 )
-weightresults<- lapply(sameday,calculateweight,fulldata,lowerbound)
+weightresults<- lapply(sameday,calculateweight,fulldata,daynum,1)
 
 weightresults<-as.numeric(as.matrix(weightresults))
 weightresults[which(is.na(weightresults))]<-0
@@ -75,7 +87,7 @@ fulldata$statefips!=fulldata[address[i],1]&
 fulldata$countyfips!=fulldata[address[i],2]
 )
 
-weightresults<- lapply(sameday,calculateweight,fulldata,upperbound)
+weightresults<- lapply(sameday,calculateweight,fulldata,daynum,0)
 weightresults<-as.numeric(as.matrix(weightresults))
 weightresults[which(is.na(weightresults))]<-0
 
