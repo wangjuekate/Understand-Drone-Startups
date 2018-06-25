@@ -1,0 +1,53 @@
+**************************
+Before
+*****************************
+before_3d<-matrix(0,nrow=1,ncol=length(radicaleventaddress))
+weightcontrolbefore_3d<-matrix(0,nrow=1,ncol=length(radicaleventaddress))
+
+calculateweight<-function(input,fulldata){
+return(mean(fulldata[(input-3):input,]$V1_y))
+}
+
+
+for(i in 1: length(radicaleventaddress)){
+
+before_3d[i]<-mean(fulldata[radicaleventaddress[i]:(radicaleventaddress[i]-3),]$V1_y)
+
+sameday<-which(fulldata$year==fulldata[radicaleventaddress[i],3]&
+fulldata$month==fulldata[radicaleventaddress[i],4]&
+fulldata$day==fulldata[radicaleventaddress[i],5]&
+fulldata$statefips!=fulldata[radicaleventaddress[i],1]&
+fulldata$countyfips!=fulldata[radicaleventaddress[i],2]
+)
+weightresults<- lapply(sameday,calculateweight,fulldata)
+
+weightcontrolbefore_3d[i]<-t(as.numeric(as.matrix(weightresults)))%*%as.matrix(1/fulldata[sameday,]$probweigthradical)
+}
+mean(before_3d)
+mean(weightcontrolbefore_3d)
+
+**************************
+After
+*****************************
+
+after_3d<-matrix(0,nrow=1,ncol=length(radicaleventaddress))
+weightcontrolafter_3d<-matrix(0,nrow=1,ncol=length(radicaleventaddress))
+
+calculateweight<-function(input,fulldata){
+return(mean(fulldata[(input+3):input,]$V1_y))
+}
+
+for(i in 1: length(radicaleventaddress)){
+before_3d[i]<-mean(fulldata[radicaleventaddress[i]:(radicaleventaddress[i]+3),]$V1_y)
+sameday<-which(fulldata$year==fulldata[radicaleventaddress[i],3]&
+fulldata$month==fulldata[radicaleventaddress[i],4]&
+fulldata$day==fulldata[radicaleventaddress[i],5]&
+fulldata$statefips!=fulldata[radicaleventaddress[i],1]&
+fulldata$countyfips!=fulldata[radicaleventaddress[i],2]
+)
+weightresults<- lapply(sameday,calculateweight,fulldata)
+
+weightcontrolbefore_3d[i]<-t(as.numeric(as.matrix(weightresults)))%*%(1/fulldata[sameday,]$probweigthradical)
+}
+mean(after_3d)
+mean(weightcontrolafter_3d)
