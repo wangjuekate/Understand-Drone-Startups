@@ -1,3 +1,15 @@
+
+
+fulldata<-read.dta("Test_20180624.dta")
+
+
+radicaleventaddress<-which(fulldata$radical==1)
+moderateeventaddress<-which(fulldata$moderate==1)
+institutionaleventaddress<-which(fulldata$institutional==1)
+
+
+
+
 **************************
 Before
 *****************************
