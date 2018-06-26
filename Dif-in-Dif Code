@@ -14,14 +14,60 @@ institutionaleventaddress<-which(fulldata$institutional==1)
 Before
 *****************************
 fulldata<-fulldata[order(fulldata$statefips,fulldata$countyfips,fulldata$year,fulldata$month,fulldata$day),]
-daynum<-50
-address<- radicaleventaddress
+
 workradical<-matrix(0,nrow=2, ncol=6)
 workmoderate<-matrix(0,nrow=2, ncol=6)
 workinstitutional<-matrix(0,nrow=2, ncol=6)
 
-mm<-calculatebeforeafter(daynum, address)
 
+daynum<-50
+address<- radicaleventaddress
+mm<-calculatebeforeafter(daynum, address)
+workradical[,1:2]<-mm
+
+daynum<-100
+address<- radicaleventaddress
+mm<-calculatebeforeafter(daynum, address)
+workradical[,3:4]<-mm
+
+
+daynum<-300
+address<- radicaleventaddress
+mm<-calculatebeforeafter(daynum, address)
+workradical[,5:6]<-mm
+
+daynum<-50
+address<- moderateeventaddress
+mm<-calculatebeforeafter(daynum, address)
+workmoderate[,1:2]<-mm
+
+daynum<-100
+address<-moderateeventaddress
+mm<-calculatebeforeafter(daynum, address)
+workmoderate[,3:4]<-mm
+
+
+daynum<-300
+address<- moderateeventaddress
+mm<-calculatebeforeafter(daynum, address)
+workmoderate[,5:6]<-mm
+
+
+daynum<-50
+address<- institutionaleventaddress
+mm<-calculatebeforeafter(daynum, address)
+workinstitutional[,1:2]<-mm
+
+daynum<-100
+address<-institutionaleventaddress
+mm<-calculatebeforeafter(daynum, address)
+workinstitutional[,3:4]<-mm
+
+
+daynum<-300
+address<- institutionaleventaddress
+mm<-calculatebeforeafter(daynum, address)
+workinstitutional[,5:6]<-mm
 
 calculateweight<-function(input,fulldata,daynum,indi){
 boundup<-input+daynum
