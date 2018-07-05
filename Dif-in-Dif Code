@@ -7,7 +7,7 @@ radicaleventaddress<-which(fulldata$radical==1)
 moderateeventaddress<-which(fulldata$moderate==1)
 institutionaleventaddress<-which(fulldata$institutional==1)
 
-
+militaryaddress<-which(fulldata$)
 
 
 **************************
