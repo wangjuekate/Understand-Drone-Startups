@@ -1,0 +1,55 @@
+data<-readLines("Register2.txt")
+data1<-unlist(strsplit(data,"]"))
+
+input<-data1[352]
+
+cleanup<-function(input,statefips,zipcode){
+
+results<-unlist(strsplit(input,","))
+results<-gsub("[[:punct:]]"," ",results)
+
+title<-results[1]
+doc<-results[2]
+posted<-results[4]
+orgs<-results[9]
+orgs<-gsub("Organization","",orgs)
+people<-results[10]
+people<-gsub("Submitter Name","",people)
+
+if(length(grep("Posted",posted))==0){
+posted<-results[5]
+}
+
+monthday<-gsub("Posted","",posted)
+monthday<-unlist(strsplit(monthday," "))
+monthday<-monthday[which(monthday!="")]
+if(length(monthday)!=3){
+month<-switch(as.numeric(as.matrix(monthday[1])),
+"Jan"=1,
+"Feb"=2,
+"Mar"=3,
+"Apr"=4,
+"May"=5,
+"Jun"=6,
+"Jul"=7,
+"Aug"=8,
+"Sep"=9,
+"Oct"=10,
+"Nov"=11,
+"Dec"=12)
+day<-as.numeric(monthday[2])
+year<-monthday[3]
+}else{
+year<-0
+month<-0
+day<-0
+}
+
+output<-data.frame(title)
+output<-cbind(output,doc,month,day, year, orgs,people)
+return(output)
+}
+
+final<-lapply(data1[1:1000],cleanup)
+library(data.table)
+final<-rbindlist(final)
