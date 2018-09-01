@@ -1,0 +1,128 @@
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+import time
+from bs4 import BeautifulSoup
+import requests
+import json
+import csv
+from xlrd import open_workbook
+import pdfminer
+from xlrd import open_workbook
+import csv
+from selenium.common.exceptions import NoSuchElementException
+from cStringIO import StringIO
+import re
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.converter import TextConverter
+from pdfminer.layout import LAParams
+from PyPDF2 import PdfFileWriter, PdfFileReader
+from pdfminer.pdfpage import PDFPage
+import PyPDF2
+import dateutil.parser
+import re
+import os
+import urllib
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+import glob
+
+def convert(fname, pages=None):
+    if not pages:
+        pagenums = set()
+
+    else:
+        pagenums = set(pages)
+
+    output = StringIO()
+    manager = PDFResourceManager()
+    converter = TextConverter(manager, output, laparams=LAParams())
+    interpreter = PDFPageInterpreter(manager, converter)
+    infile = file(fname, 'rb')
+
+    for page in PDFPage.get_pages(infile, pagenums):
+        interpreter.process_page(page)
+    infile.close()
+    converter.close()
+    text = output.getvalue()
+    output.close
+    return text
+
+
+book = open_workbook('C:/Users/wang547/Downloads/Tofind.xlsx')
+browser = webdriver.Chrome("C:/Users/wang547/Downloads/chromedriver.exe")
+for i in range(1836,6000):
+    sheet1= book.sheet_by_index(0)
+    name = sheet1.cell(i,0).value
+    name =str(name)
+    website= 'https://www.regulations.gov/contentStreamer?documentId=FAA-'+name+'-0001&attachmentNumber=1&contentType=pdf'
+    print website
+    try:
+
+        browser.get(website)
+        time.sleep(20)
+
+        #url = "https://www.regulations.gov/contentStreamer?documentId=FAA-2015-0906-0001&attachmentNumber=1&contentType=pdf"
+        #browser.close()
+        direc = 'C:/Users/wang547/Downloads/' # Get current working directory
+        ext = '.pdf' # Select your file delimiter
+
+        file_dict = {} # Create an empty dict
+
+        #list_of_files = glob.glob(direc)  # * means all if need specific format then *.csv
+
+        txt_files = [i for i in os.listdir(direc) if os.path.splitext(i)[1] == ext]
+        print txt_files
+        paths = [os.path.join(direc, basename) for basename in txt_files]
+        print paths
+        latest_file = max(paths, key=os.path.getctime)
+        #txt_files = [i for i in files1 if os.path.splitext(i)[1] == ext]
+
+        #path = os.path.join(direc, txt_files[len(txt_files)-1])
+        print latest_file
+        path = os.path.join(direc, latest_file)
+        print path
+        try:
+            mm = convert(path)
+            text = "\n".join([ll.rstrip() for ll in mm.splitlines() if ll.strip()])
+            l = open('C:/Users/wang547/Downloads/TxtContainer/' + name + '.txt', 'w')
+            l.write(text)
+            l.close()
+            os.remove(path)
+        except:
+            print 'no pdf'
+            os.remove(path)
+    except:
+        print 'no website'
+
+    # Iterate over your txt files
+    '''
+    for f in txt_files:
+        # Open them and assign them to file_dict
+        path = os.path.join(direc,f)
+        try:
+            mm = convert(path)
+            text = "\n".join([ll.rstrip() for ll in mm.splitlines() if ll.strip()])
+            l = open('C:/Users/Jue Wang/Downloads/TxtContainer'+ name +'.txt', 'w')
+            l.write(text)
+            l.close()
+        except:
+            print 'no pdf'
+        file =open(path,'r')
+        file.close()
+        os.remove(path)
+'''
+
+
+
+
+
+
+
+
+
