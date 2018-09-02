@@ -1,0 +1,66 @@
+require(tm)
+require(NLP)
+require(openNLP)
+library(openNLPmodels.en)
+
+
+convert_text_to_sentences <- function(text1, lang = "en") {
+  # Function to compute sentence annotations using the Apache OpenNLP Maxent sentence detector employing the default model for language 'en'. 
+  
+  lang = "en"
+  sentence_token_annotator <- Maxent_Sent_Token_Annotator(language = lang)
+
+  # Convert text to class String from package NLP
+  text1 <- as.String(text1)
+
+  # Sentence boundaries in text
+  sentence.boundaries <- annotate(text1, sentence_token_annotator)
+  
+
+  # Extract sentences
+  sentences <- text1[sentence.boundaries]
+
+  # return sentences
+  return(sentences)
+}
+
+txt1<- convert_text_to_sentences(text1)
+
+
+
+filelist <- list.files(path = ".")
+output<-matrix("",nrow=6000,ncol=100)
+for(i in 1:6000){
+
+text1<-readLines(filelist[i])
+text1<-paste(text1, collapse= " ")
+i
+
+text = as.String(text1)
+sent_annot = Maxent_Sent_Token_Annotator()
+word_annot = Maxent_Word_Token_Annotator()
+loc_annot = Maxent_Entity_Annotator(kind = "location") #annotate location
+people_annot = Maxent_Entity_Annotator(kind = "person") #annotate person
+
+annot.l1 = NLP::annotate(text, list(sent_annot,word_annot,loc_annot,people_annot))
+
+k <- sapply(annot.l1$features, `[[`, "kind")
+berk_people = text[annot.l1[k == "person"]]
+
+email = regmatches(text, gregexpr("([_a-z0-9-]+(\\.[_a-z0-9-]+)*@[a-z0-9-]+(\\.[a-z0-9-]+)*(\\.[a-z]{2,4}))", text))
+ID<-gsub("","",filelist[i])
+output[i,]<-c(ID,berk_people,email)
+}
+
+
+
+berk_locations = text[annot.l1[k == "location"]]
+txt2<-txt1[grep("information", txt1)]
+
+txt3<-txt1[grep("safety", txt1)]
+
+txt3<-txt1[grep("public", txt1)]
+
+
+
+
