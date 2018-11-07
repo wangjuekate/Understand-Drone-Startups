@@ -32,3 +32,29 @@ results<-do.call(rbind,results)
 
 write.table(results,file="checkedwebsite.csv",sep=",",row.names=FALSE)
 
+check1<-read.table("check1.csv",sep=",",header=TRUE)
+
+checkwebsite<-function(input){
+name<-as.character(as.matrix(input[3]))
+website<-as.character(as.matrix(input[4]))
+compare<-unlist(strsplit(website,"/"))
+compare<-tolower(compare[length(compare)])
+name<-tolower(name)
+indicator<-levenshteinSim(name,compare)
+if(length(indicator)==0){
+indicator<-0
+}
+order1<-as.character(as.matrix(input[1]))
+ID<-as.character(as.matrix(input[2]))
+output<-data.frame(order1)
+output<-cbind(output,ID, website,indicator)
+return(output)
+}
+
+
+
+library(plyr)
+results<-apply(check1,1,checkwebsite)
+results<-do.call(rbind,results)
+write.table(results,file="test.csv",sep=",",row.names=FALSE)
+
