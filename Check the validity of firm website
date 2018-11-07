@@ -1,4 +1,4 @@
-data<-readLines("firmmanta.txt")
+data<-readLines("firmmanta1.txt")
 data1<-unlist(strsplit(data,"]"))
 
 install.packages("RecordLinkage")
@@ -7,7 +7,7 @@ library(RecordLinkage)
 
 
 cleanup<-function(input){
-input<-gsub("\\","",input,fixed=TRUE)
+input<-gsub("\"","",input,fixed=TRUE)
 input<-gsub("[","",input,fixed=TRUE)
 results<-unlist(strsplit(input,","))
 ID<-results[1]
@@ -29,3 +29,6 @@ return(output)
 library(plyr)
 results<-lapply(data1,cleanup)
 results<-do.call(rbind,results)
+
+write.table(results,file="checkedwebsite.csv",sep=",",row.names=FALSE)
+
