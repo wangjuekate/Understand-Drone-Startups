@@ -1,0 +1,78 @@
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+import time
+from bs4 import BeautifulSoup
+import requests
+import json
+import csv
+from xlrd import open_workbook
+import pdfminer
+from xlrd import open_workbook
+import csv
+from selenium.common.exceptions import NoSuchElementException
+from cStringIO import StringIO
+import re
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.converter import TextConverter
+from pdfminer.layout import LAParams
+from PyPDF2 import PdfFileWriter, PdfFileReader
+from pdfminer.pdfpage import PDFPage
+import PyPDF2
+import dateutil.parser
+import re
+import os
+import urllib
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+import glob
+
+browser = webdriver.Chrome("C:/Users/Jue Wang/Downloads/chromedriver.exe")
+book = open_workbook('C:/Users/Jue Wang/Downloads/linkedin.xlsx')
+
+browser.get('https://www.linkedin.com/')
+time.sleep(30)
+
+for i in range(1,5000):
+    sheet1= book.sheet_by_index(0)
+    website= sheet1.cell(i,1).value
+    #clean up the website
+    website.replace(" ","-" )
+    website = website + "/about/"
+    print website
+    name = sheet1.cell(i,0).value
+    print name
+    output =[]
+    try:
+        browser.get(website)
+        time.sleep(10)
+
+        #auto log in
+
+
+        soup = BeautifulSoup(browser.page_source)
+        image = soup.find('img',{'class':'lazy-image org-top-card-primary-content__logo Elevation-0dp loaded'})
+        url =image['src']
+        url =url.replace(";","&")
+        print url
+        response =requests.get(url)
+        file = open('C:/Users/Jue Wang/Downloads/'+name+'.png','wb')
+        file.write(response.content)
+        text = soup.find('div',{'class':'org-grid__core-rail'}).findChildren()
+        for alltext in text:
+            output.append(alltext.get_text('utf-8'))
+        output.append(name)
+        f =open('C:/Users/Jue Wang/Downloads/text.txt','a')
+        json.dump(output,f)
+    except:
+        print 'wrong'
+
+
+
+
+
