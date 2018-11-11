@@ -1,0 +1,58 @@
+data<-read.table("ID.csv",sep=",",header=TRUE)
+
+linkedin<-readLines("LinkedinFirmData.txt")
+linkedin<-unlist(strsplit(linkedin,"]"))
+
+
+findtheinfo<-function(input, linkedin){
+
+ID<-as.character(as.matrix(input[1]))
+address<-grep(ID,linkedin)
+
+if(length(address)>0){
+
+item<-gsub("utf-8"," ",linkedin[address[1]])
+item<-unlist(strsplit(item," "))
+item<-item[which(item!=" ")]
+item<-item[which(item!="")]
+item<-item[which(item!="\\\\n")]
+
+founded<-grep("Founded",item)[1]
+founded<-item[founded+1]
+
+companysize<-grep("Company size",item)[1]
+companysize<-item[companysize+1]
+
+type<-grep("Type",item)[1]
+type<-item[type+1]
+
+website<-grep("Website",item)[1]
+website<-item[website+1]
+
+}else{
+
+founded<-""
+companysize<-""
+type<-""
+website<-""
+
+}
+
+output<-data.frame(founded)
+output<-cbind(output,companysize,type,website)
+return(output)
+}
+
+input<-data[2,]
+
+
+results<-lapply(data[1,], findtheinfo,linkedin )
+
+
+
+
+
+
+
+
+
