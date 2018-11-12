@@ -3,6 +3,8 @@ data<-read.table("ID.csv",sep=",",header=TRUE)
 linkedin<-readLines("LinkedinFirmData.txt")
 linkedin<-unlist(strsplit(linkedin,"]"))
 
+library(stringr)
+
 
 findtheinfo<-function(input, linkedin){
 
@@ -11,11 +13,16 @@ address<-grep(ID,linkedin)
 
 if(length(address)>0){
 
-item<-gsub("utf-8"," ",linkedin[address[1]])
-item<-unlist(strsplit(item," "))
+
+
+item<-unlist(strsplit(linkedin[address[1]], "\\\\n"))
+item<-gsub("utf-8"," ",item)
+
+item<- str_replace(gsub("\\s+", " ", str_trim(item)), "B", "b")
+
 item<-item[which(item!=" ")]
 item<-item[which(item!="")]
-item<-item[which(item!="\\\\n")]
+
 
 founded<-grep("Founded",item)[1]
 founded<-item[founded+1]
@@ -29,30 +36,29 @@ type<-item[type+1]
 website<-grep("Website",item)[1]
 website<-item[website+1]
 
+maintask<-grep("Page details",item)[1]
+maintask<-item[maintask+1]
+maintaskdrone<-length(grep("drone",maintask))
+
 }else{
 
 founded<-""
 companysize<-""
 type<-""
 website<-""
-
+maintaskdrone<-""
 }
 
 output<-data.frame(founded)
-output<-cbind(output,companysize,type,website)
+output<-cbind(output,companysize,type,website, maintaskdrone)
 return(output)
 }
 
-input<-data[2,]
 
 
-results<-lapply(data[1,], findtheinfo,linkedin )
-
-
-
-
-
-
-
-
+results<-apply(data,1, findtheinfo,linkedin )
+library(data.table)
+results<-rbindlist(results)
+results<-cbind(data,results)
+write.table(results,file="linkedinfo.csv",sep=",",row.names=FALSE)
 
