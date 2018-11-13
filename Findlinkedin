@@ -32,13 +32,18 @@ companysize<-item[companysize+1]
 
 type<-grep("Type",item)[1]
 type<-item[type+1]
-
-website<-grep("Website",item)[1]
-website<-item[website+1]
+website<-grep("Website",item)
+if(length(website)>1){
+address<-which(nchar(item[website])==7)
+website<-item[website[address[1]]+1]
+}else{
+website<-item[website[1]+1]
+}
 
 maintask<-grep("Page details",item)[1]
-maintask<-item[maintask+1]
+maintask<-tolower(item[maintask+1])
 maintaskdrone<-length(grep("drone",maintask))
+
 
 }else{
 
