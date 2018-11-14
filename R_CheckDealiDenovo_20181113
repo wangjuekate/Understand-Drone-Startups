@@ -1,0 +1,22 @@
+ID<-read.table("ID.csv",sep=",",header=TRUE)
+index<-readLines("indexpage.txt")
+index<-unlist(strsplit(index,"]"))
+library(stringr)
+
+
+findtheinfo<-function(input, index){
+
+ID<-as.character(as.matrix(input[1]))
+address<-grep(ID,index)
+
+indi1<-length(grep("drone",tolower(index[address])))
+indi2<-length(grep("unmanned aerial",tolower(index[address])))
+indi<-indi1+indi2
+if(indi!=0){
+return(1)
+}else{return(0)}
+
+}
+
+results<-unlist(apply(ID,1,findtheinfo,index))
+
