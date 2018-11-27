@@ -1,0 +1,16 @@
+
+fulldata<-read.table("ProtestFulldata_20180819.csv",sep=",",header=TRUE)
+fulllocation<-read.table("applicationlocation.csv",sep=",",header=TRUE)
+
+
+#Add early movers
+earlymovers<-read.table("DenovoSeekingregulationopportunities.csv",sep=",",header=TRUE)
+laterapplication<-read.table("DenovoSeekingmarketopportunity.csv",sep=",",header=TRUE)
+
+nrow(earlymovers)
+earlymovers<-merge(earlymovers,fulllocation, by.x="ID", by.y="docID",all.x=TRUE)
+nrow(earlymovers)
+
+
+#Add later applications
+
