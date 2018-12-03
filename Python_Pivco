@@ -1,0 +1,67 @@
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+import time
+from bs4 import BeautifulSoup
+import requests
+import json
+import csv
+from xlrd import open_workbook
+import pdfminer
+from xlrd import open_workbook
+import csv
+from selenium.common.exceptions import NoSuchElementException
+from cStringIO import StringIO
+import re
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.converter import TextConverter
+from pdfminer.layout import LAParams
+from PyPDF2 import PdfFileWriter, PdfFileReader
+from pdfminer.pdfpage import PDFPage
+import PyPDF2
+import dateutil.parser
+import re
+import os
+import urllib
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+import glob
+
+
+
+book = open_workbook('C:/Users/wang547/Documents/DenovoFirm_20181202.xlsx')
+
+
+
+for i in range(1,5000):
+    browser = webdriver.Chrome("C:/Users/wang547/Downloads/chromedriver.exe")
+    browser.get('https://www.privco.com/dashboard')
+    time.sleep(5)
+    sheet1= book.sheet_by_index(0)
+    ID = sheet1.cell(i,0).value
+    name =sheet1.cell(i,1).value
+    name = name.lstrip()
+    name = name.rstrip()
+    output =[]
+    output.append(ID)
+    output.append(name)
+    try:
+        inputbox = browser.find_element_by_xpath('//*[@id="primary_search"]')
+        inputbox.clear()
+        inputbox.send_keys(name)
+        button = browser.find_element_by_xpath('//*[@id="headerSearch"]/button')
+        button.click()
+        time.sleep(5)
+        website = browser.current_url
+        output.append(website)
+
+        f =open('C:/Users/wang547/Downloads/PrivateFirmInfo.txt','a')
+        json.dump(output,f)
+    except:
+        print 'wrong'
+    browser.close()
