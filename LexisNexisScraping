@@ -24,7 +24,7 @@ firefoxProfile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so', 'fals
 
 browser = webdriver.Firefox(firefoxProfile)
 
-browser.get('http://www-lexisnexis-com.libproxy1.usc.edu/hottopics/lnacademic/?')
+browser.get('https://advance-lexis-com.libproxy1.usc.edu/search/index?crid=cc6276c5-636e-49eb-afee-71180759d403&pdpermalink=5403dd31-550c-4ae1-86dd-ac8f65752d1c&pdmfid=1516831&pdisurlapi=true')
 
 #log in to lexis nexis
 
@@ -37,13 +37,6 @@ Button=browser.find_element_by_xpath('//div[@id="searchDiv_2"]//input[1]')
 Button.click()
 
 
-firefoxProfile = FirefoxProfile()
-		## Disable CSS
-		# firefoxProfile.set_preference('permissions.default.stylesheet', 2)
-		## Disable images
-firefoxProfile.set_preference('permissions.default.image', 2)
-		## Disable Flash
-firefoxProfile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so', 'false')
 
 csvfile = open('D:\Tools for literature Review\Scape with selenium\outCitation.csv', 'wb')
 fieldnames = ['title', 'author','time','source','cited','abstract']
