@@ -20,3 +20,67 @@ return(output)
 library(plyr)
 results<- lapply(output,cleanid)
 results<-do.call(rbind,results)
+
+
+
+
+text<-readLines("/Users/wangjue/Downloads/firstapply.txt")
+cleantext<-unlist(strsplit(text,'"]'))
+
+cleanid<-function(input){   
+add<-unlist(strsplit(as.character(input),"\""))
+add<-add[which(add!="")]
+
+org<-""
+address1<-grep("- Exemption/Rulemaking",add)
+if(length(address1)!=0){
+org<-unlist(strsplit(add[address1],"-"))[1]
+org<-gsub("[[:punct:]]","",org)}
+
+founder<-""
+address2<-grep("Submitter Name",add)
+if(length(address2)!=0){
+founder<-unlist(strsplit(add[address2],":"))[2]
+founder<-gsub("[[:punct:]]","",founder)}
+
+city<-""
+address3<-grep("City",add)
+    if(length(address3)!=0){
+city<-unlist(strsplit(add[address3],":"))[2]
+city<-gsub("[[:punct:]]","",city)}
+ 
+    country<-""
+address4<-grep("Country",add)
+        if(length(address4)!=0){
+country<-unlist(strsplit(add[address4],":"))[2]
+country<-gsub("[[:punct:]]","",country)}
+ 
+    
+    state<-""
+address5<-grep("State or Province",add)
+        if(length(address5)!=0){
+state<-unlist(strsplit(add[address5],":"))[2]
+state<-gsub("[[:punct:]]","",state)
+        }
+    
+zipcode<-""
+address6<-grep("ZIP/Postal Code",add)
+if(length(address6)!=0){
+
+zipcode<-unlist(strsplit(add[address6],":"))[2]
+zipcode<-gsub("[[:punct:]]","",zipcode)}
+
+idI<-add[length(add)]
+output<-data.frame(org)
+output<-cbind(output,founder,city,country,state,zipcode, idI)
+    
+return(output)
+
+}
+
+
+library(plyr)
+results<- lapply(cleantext,cleanid)
+results<-do.call(rbind,results)
+
+write.table(results,file="/Users/wangjue/Downloads/adddrone.csv",sep=",",row.names=FALSE)
