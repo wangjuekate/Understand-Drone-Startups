@@ -84,3 +84,10 @@ results<- lapply(cleantext,cleanid)
 results<-do.call(rbind,results)
 
 write.table(results,file="/Users/wangjue/Downloads/adddrone.csv",sep=",",row.names=FALSE)
+
+
+data<-read.table("/Users/wangjue/Downloads/output.csv", sep=",",header=TRUE)
+
+data[,2]<-as.character(as.matrix(data[,2]))
+library(stringr)
+data$countyFIPS<-as.numeric(as.matrix(str_sub(data[,2],-3,-1)))
