@@ -15,3 +15,8 @@ DroneFirmBasicInfor
 FirmTrackingSheet
 Shared with team members
 
+
+#function: founding team collection
+
+search linkedin for founder teams
+
